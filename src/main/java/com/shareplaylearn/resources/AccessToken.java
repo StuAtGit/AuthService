@@ -58,7 +58,7 @@ public class AccessToken {
         return "OK";
     }
 
-    public static String getAccessToken(Request req, Response res) {
+    public static String getTokenValidation(Request req, Response res) {
         res.status(500);
         res.body("Not Implemented.");
         return "Internal Server Error";

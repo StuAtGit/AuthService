@@ -31,6 +31,6 @@ public class AuthService
     public static void main( String[] args )
     {
         post( "/api/access_token", (req, res) -> AccessToken.handlePostAccessToken(req, res) );
-        get( "/api/token_validation", (req, res) -> AccessToken.getAccessToken(req, res) );
+        get( "/api/token_validation", (req, res) -> AccessToken.getTokenValidation(req, res) );
     }
 }
