@@ -28,6 +28,14 @@ import java.nio.charset.StandardCharsets;
  */
 public class AccessToken {
 
+    /**
+     * TODO: we're abandoning the idea of internal OAUTH flow (it 'twas a teensy shady), and
+     * TODO: this will just be use for users that create their own accounts.
+     * TODO: which means redis, JWT signing & validation utilities, user stores, bcrypt, etc.
+     * @param req
+     * @param res
+     * @return
+     */
     public static String handlePostAccessToken(Request req, Response res) {
         String credentialHeader = req.headers("Authorization");
         if( credentialHeader == null ) {
@@ -53,9 +61,9 @@ public class AccessToken {
         String username = credentials[1];
         String password = credentials[2];
 
-        res.status(200);
-        res.body("dummmy_token");
-        return "OK";
+        res.status(500);
+        res.body("Not Implemented.");
+        return "Internal Server Error";
     }
 
     public static String getTokenValidation(Request req, Response res) {
