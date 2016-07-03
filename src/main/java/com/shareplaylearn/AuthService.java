@@ -22,11 +22,13 @@ package com.shareplaylearn;
 
 import com.shareplaylearn.resources.AccessToken;
 import com.shareplaylearn.resources.OAuth;
+import com.shareplaylearn.resources.Status;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
 import static spark.Spark.get;
+import static spark.Spark.port;
 import static spark.Spark.post;
 
 /**
@@ -65,10 +67,18 @@ public class AuthService
 
     public static void main( String[] args )
     {
+        /**
+         * TODO: test deploy
+         *TODO: make configurable
+         */
+        int listenPort = 1443;
+
+        port(listenPort);
         post( "/auth_api/access_token", (req, res) -> AccessToken.handlePostAccessToken(req, res) );
         //Validation is a noun people! Did you get your validation before you left the theatre?
         get( "/auth_api/token_validation", (req, res) -> AccessToken.getTokenValidation(req, res) );
         get( OAUTH_CALLBACK_PATH, (req,res) -> OAuth.GoogleOauthCallback(req,res) );
         get( "/auth_api/oauthToken_validation", (req,res) -> OAuth.validateToken(req,res));
+        get( "/auth_api/status", (req,res) -> Status.getStatus() );
     }
 }
