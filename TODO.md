@@ -1,7 +1,11 @@
 ##Infrastructure Update/API refactor
-- Test Oauth implementation (Test might port over OAuthPasswordFlow logic)
-- Looks like it works, redirects back with info - get UI up to confirm?
-- Integrate into FileService, mock test appropriately
+- Test Oauth implementation 
+    - basic redirect works
+    - get simple UI To parse token, etc
+    - use with e2e test of FileService, pinging auth service
+- Get UI ported over
+- Mock unit tests for File & Auth Service
+- Redis cache of S3 objects
 - Backup shareplaylearn.com server, including secrets file and home directory
 - Figure out how much of a clean-slate I should start with for that server
 - Re-configure nginx, update TLS settings (session, ciphers, etc), and routes to services
