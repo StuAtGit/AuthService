@@ -18,6 +18,7 @@
 package com.shareplaylearn;
 
 import com.google.gson.Gson;
+import com.shareplaylearn.services.SecretsService;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
@@ -30,6 +31,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,6 +39,8 @@ import static org.junit.Assert.assertTrue;
 
 /**
  * Created by stu on 5/8/15.
+ * TODO: this is currently BROKEN. The way the google login worked has changed, so when you enter
+ * TODO: your username, it ajaxes the password box open.
  * This class allows for automated submission, parsing, and response to the google oauth form, simulating
  * user interaction with the form, given a user and password.
  * However, since it works with the actual google endpoint, it will only work if the share,play,learn API Oauth callback
@@ -154,28 +158,30 @@ public class OauthPasswordFlow {
         System.out.println(oauthForm.toString());
         Connection oauthPostConnection  = Jsoup.connect("https://accounts.google.com/ServiceLoginAuth");
         HashMap<String,String> formParams = new HashMap<>();
+
         for( Element child : oauthForm.children() ) {
+            System.out.println("Tag name: " + child.tagName());
+            System.out.println("attrs: " + Arrays.toString(child.attributes().asList().toArray()));
             if( child.tagName().equals("input")
                     && child.hasAttr("name") ) {
 
                 String keyName = child.attr("name");
                 String keyValue = null;
 
-                if( keyName.equals("Email") ) {
-                    keyValue = username;
-                } else if( keyName.equals("Passwd")) {
-                    keyValue = password;
-                } else if( child.hasAttr("value") ) {
+                if( child.hasAttr("value") ) {
                     keyValue = child.attr("value");
                 }
 
-                if( keyValue != null ) {
+                if( keyName != null && keyName.trim().length() != 0 &&
+                        keyValue != null && keyValue.trim().length() != 0) {
                     oauthPostConnection.data(keyName, keyValue);
                     formParams.put(keyName,keyValue);
                 }
             }
         }
         oauthPostConnection.cookies(oauthCookies);
+        formParams.put("Email", username);
+        formParams.put("Passwd-hidden", password);
         //oauthPostConnection.followRedirects(false);
         System.out.println("form post params were: ");
         for( Map.Entry<String,String> kvp : formParams.entrySet() ) {
@@ -189,6 +195,7 @@ public class OauthPasswordFlow {
         for( Map.Entry<String,String> cookie : oauthCookies.entrySet() ) {
             System.out.println(cookie.getKey() + "," + cookie.getValue());
         }
+        //System.exit(0);
         Connection.Response postResponse = null;
         try {
             postResponse = oauthPostConnection.method(Connection.Method.POST).timeout(5000).execute();
@@ -243,5 +250,11 @@ public class OauthPasswordFlow {
         loginInfo.idTokenBody = new Gson().fromJson(jwtBody,OauthJwt.class);
         loginInfo.id = loginInfo.idTokenBody.sub;
         return loginInfo;
+    }
+
+    public static void main( String args[] )
+            throws IOException, AuthorizationException, UnauthorizedException, URISyntaxException {
+        googleLogin(SecretsService.testOauthUsername, SecretsService.testOauthPassword,
+                SecretsService.googleClientId, "https://www.shareplaylearn.com/auth_api/oauth2callback");
     }
 }
