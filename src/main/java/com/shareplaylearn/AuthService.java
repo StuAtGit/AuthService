@@ -27,9 +27,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 
-import static spark.Spark.get;
-import static spark.Spark.port;
-import static spark.Spark.post;
+import static spark.Spark.*;
 
 /**
  * Hello world!
@@ -74,6 +72,8 @@ public class AuthService
         int listenPort = 1443;
 
         port(listenPort);
+        //until we configure SSL, this should be hard-coded to localhost
+        ipAddress("127.0.0.1");
         post( "/auth_api/access_token", (req, res) -> AccessToken.handlePostAccessToken(req, res) );
         //Validation is a noun people! Did you get your validation before you left the theatre?
         get( "/auth_api/token_validation", (req, res) -> AccessToken.getTokenValidation(req, res) );

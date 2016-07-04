@@ -1,5 +1,6 @@
 ##Infrastructure Update/API refactor
 - Test Oauth implementation (Test might port over OAuthPasswordFlow logic)
+- Looks like it works, redirects back with info - get UI up to confirm?
 - Integrate into FileService, mock test appropriately
 - Backup shareplaylearn.com server, including secrets file and home directory
 - Figure out how much of a clean-slate I should start with for that server
