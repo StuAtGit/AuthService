@@ -20,11 +20,14 @@
 
 package com.shareplaylearn.resources;
 
+import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.shareplaylearn.AuthService;
+import com.shareplaylearn.TokenValidator;
 import com.shareplaylearn.exceptions.Exceptions;
+import com.shareplaylearn.models.TokenInfo;
 import com.shareplaylearn.services.SecretsService;
 import org.apache.http.Consts;
 import org.apache.http.NameValuePair;
@@ -139,24 +142,28 @@ public class OAuth {
     }
 
     public static String validateToken( Request req, Response res ) {
-        String accessToken = req.headers("Authorization");
+        String token = req.headers(AUTHENTICATION_HEADER);
 
-        if( accessToken == null ) {
+        if( token == null || token.trim().equals("") ) {
+            token = req.params(":token");
+        }
+
+        if( token == null ) {
             res.status(BAD_REQUEST.getCode());
             res.body("No access token found.");
             return BAD_REQUEST.toString();
         }
-        accessToken = accessToken.trim();
+        token = token.trim();
         //allow for access tokens passed directly from header into this method
         //(that still have the Bearer prefix)
-        if( !accessToken.startsWith("Bearer ") ) {
-            accessToken = "Bearer " + accessToken;
+        if( !token.startsWith("Bearer ") ) {
+            token = "Bearer " + token;
         }
         HttpGet tokenGet = new HttpGet("https://www.googleapis.com/plus/v1/people/me");
-        tokenGet.addHeader("Authorization", accessToken);
+        tokenGet.addHeader("Authorization", token);
         try( CloseableHttpResponse response = httpClient.execute(tokenGet) ) {
             if( response.getStatusLine().getStatusCode() != 200 ) {
-                log.info( "Access token: " + accessToken + " failed: " + response.getStatusLine().getReasonPhrase() );
+                log.info( "Access token: " + token + " failed: " + response.getStatusLine().getReasonPhrase() );
                 String errorMessage = "";
                 if( response.getEntity() != null ) {
                     errorMessage = EntityUtils.toString(response.getEntity());
@@ -168,8 +175,13 @@ public class OAuth {
                 return UNAUTHORIZED.toString();
             }
             res.status(200);
-            res.body(accessToken);
-            return "OK";
+            if( response.getEntity() != null ) {
+                return EntityUtils.toString(response.getEntity());
+            } else {
+                TokenInfo tokenInfo = new TokenInfo( token );
+                Gson gson = new Gson();
+                return gson.toJson(tokenInfo);
+            }
         } catch (Exception e) {
             log.error(Exceptions.asString(e));
             res.status(INTERNAL_SERVER_ERROR.getCode());

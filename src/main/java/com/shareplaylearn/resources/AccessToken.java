@@ -17,6 +17,7 @@
  */
 package com.shareplaylearn.resources;
 
+import com.shareplaylearn.AuthService;
 import org.apache.commons.codec.binary.Base64;
 import spark.Request;
 import spark.Response;
@@ -67,6 +68,10 @@ public class AccessToken {
     }
 
     public static String getTokenValidation(Request req, Response res) {
+        String token = req.headers(AuthService.AUTHENTICATION_HEADER);
+        if( token == null || token.trim().equals("") ) {
+            token = req.params(":token");
+        }
         res.status(500);
         res.body("Not Implemented.");
         return "Internal Server Error";

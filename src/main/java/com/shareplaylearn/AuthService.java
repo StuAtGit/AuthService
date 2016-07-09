@@ -26,6 +26,7 @@ import com.shareplaylearn.resources.Status;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import spark.route.RouteOverview;
 
 import static spark.Spark.*;
 
@@ -46,6 +47,8 @@ public class AuthService
     public static final String OAUTH_CALLBACK_PATH;
     //THis is the endpoint to query for the final user information, after google invokes our callback
     public static final String GOOGLE_TOKEN_ENDPOINT;
+    //yes, the http Authorization header is usually used for authentication, as it is here
+    public static final String AUTHENTICATION_HEADER = "Authorization";
 
     static {
         OAUTH_REDIRECT_LOCATION = "https://www.shareplaylearn.com/#/login_callback";
@@ -65,20 +68,18 @@ public class AuthService
 
     public static void main( String[] args )
     {
-        /**
-         * TODO: test deploy
-         *TODO: make configurable
-         */
         int listenPort = 1443;
-
         port(listenPort);
         //until we configure SSL, this should be hard-coded to localhost
         ipAddress("127.0.0.1");
+        RouteOverview.enableRouteOverview("/auth_api/overview");
         post( "/auth_api/access_token", (req, res) -> AccessToken.handlePostAccessToken(req, res) );
         //Validation is a noun people! Did you get your validation before you left the theatre?
         get( "/auth_api/token_validation", (req, res) -> AccessToken.getTokenValidation(req, res) );
+        get( "/auth_api/token_validation/:token", (req, res) -> AccessToken.getTokenValidation(req, res) );
         get( OAUTH_CALLBACK_PATH, (req,res) -> OAuth.GoogleOauthCallback(req,res) );
         get( "/auth_api/oauthToken_validation", (req,res) -> OAuth.validateToken(req,res));
+        get( "/auth_api/oauthToken_validation/:token", (req,res) -> OAuth.validateToken(req,res));
         get( "/auth_api/status", (req,res) -> Status.getStatus() );
     }
 }
