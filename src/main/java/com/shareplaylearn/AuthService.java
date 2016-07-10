@@ -72,7 +72,7 @@ public class AuthService
         port(listenPort);
         //until we configure SSL, this should be hard-coded to localhost
         ipAddress("127.0.0.1");
-        RouteOverview.enableRouteOverview("/auth_api/overview");
+        RouteOverview.enableRouteOverview("/auth_api");
         post( "/auth_api/access_token", (req, res) -> AccessToken.handlePostAccessToken(req, res) );
         //Validation is a noun people! Did you get your validation before you left the theatre?
         get( "/auth_api/token_validation", (req, res) -> AccessToken.getTokenValidation(req, res) );
